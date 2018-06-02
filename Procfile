@@ -1,1 +1,1 @@
-web: gunicorn -b 0.0.0.0:$PORT api:app
+web: gunicorn -b 0.0.0.0:4000 api:app
