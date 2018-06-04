@@ -4,6 +4,7 @@ from flask import Flask, jsonify, abort, make_response
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from instagram import main
 
+
 app = Flask(__name__, static_url_path="")
 api = Api(app)
 
@@ -20,10 +21,11 @@ class InstAPI(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
+        print (args)
         return main(args.f, args.b), 200
 
 
-api.add_resource(InstAPI, '/api/v1.0/is_following', endpoint='is_following')
+api.add_resource(InstAPI, '/api/v1/follow', endpoint='follow')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

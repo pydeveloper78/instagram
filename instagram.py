@@ -22,11 +22,13 @@ class User(object):
         # self.following = 0
 
     def __repr__(self):
-        return "%s <%s>" % (self.id, self.username)
+        return "User %s<%s>" % (self.id, self.username)
 
     def add(self, user):
         self.follows.append(user)
         print (user)
+
+
 class InstagramAPI(object):
     def __init__(self, **kwargs):
         self.fan = kwargs["fan"]
