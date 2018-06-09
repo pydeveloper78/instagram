@@ -411,6 +411,11 @@ class InContentAPI(object):
             user.end_cursor = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["page_info"]["end_cursor"]
         
         for node in sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"]:
+            if len(node["node"]["edge_media_to_caption"]["edges"]) != 0:
+                caption = node["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"]
+            else:
+                caption = ""
+
             content = Content(
                 id="%s_%s" % (node["node"]["id"], userid),
                 user={
@@ -422,7 +427,7 @@ class InContentAPI(object):
                 created_time=node["node"]["taken_at_timestamp"],
                 caption={
                     "id": node["node"]["id"],
-                    "text": node["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"]
+                    "text": caption
                 },
                 likes={
                     "count": node["node"]["edge_media_preview_like"]["count"]
