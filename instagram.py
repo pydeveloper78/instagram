@@ -7,10 +7,12 @@ import sys
 import time
 
 import requests
+
 from lxml import html
 
 
 class User(object):
+
     def __init__(self, **kwargs):
         self.id = kwargs["id"]
         self.username = kwargs["username"]
@@ -29,10 +31,11 @@ class User(object):
 
     def add(self, user):
         self.follows.append(user)
-        print (user)
+        print(user)
 
 
 class InstagramAPI(object):
+
     def __init__(self, **kwargs):
         self.fan = kwargs["fan"]
         self.brand = kwargs["brand"]
@@ -57,19 +60,19 @@ class InstagramAPI(object):
         brand_url = "%s/%s/" % (self.endpoint, self.brand)
         r = self.session.get(fan_url)
         if r.status_code != 200:
-            return {"status":None, "message": "Bad Response for Fan User."}
+            return {"status": None, "message": "Bad Response for Fan User."}
         self.queryid = self.find_following_query_id(r)
         if self.queryid is None:
             return {"status": None, "message": "Invalid Fan Query Hash."}
         fan_user = self.get_profile(r)
         if fan_user is None:
             return {"status": None, "message": "Cookies/Response Error at Fan processing."}
-        
+
         if fan_user.is_private is True:
-            print ("private fan profile")
+            print("private fan profile")
             r = self.session.get(brand_url)
             if r.status_code != 200:
-                return {"status":None, "message": "Bad Response for Brand User."}
+                return {"status": None, "message": "Bad Response for Brand User."}
             self.queryid = self.find_followed_query_id(r)
             # print (self.queryid)
             if self.queryid is None:
@@ -80,7 +83,7 @@ class InstagramAPI(object):
             if brand_user.is_private is True:
                 return {"status": None, "message": "Fan & Brand profiles are private"}
             return self.is_followed(brand_user)
-        
+
         return self.is_following(fan_user)
 
     def is_following(self, user):
@@ -89,13 +92,15 @@ class InstagramAPI(object):
             'variables': '{"id":"%s","first":50}' % (user.id)
         }
         while True:
-            r = self.session.get('https://www.instagram.com/graphql/query/', params=params)
+            r = self.session.get(
+                'https://www.instagram.com/graphql/query/', params=params)
             edges = r.json()
             if edges["status"] == "fail":
                 return {"status": False, "message": edges["message"]}
-            
+
             for edge in edges["data"]["user"]["edge_follow"]["edges"]:
-                u = User(id=edge["node"]["id"], username=edge["node"]["username"])
+                u = User(id=edge["node"]["id"],
+                         username=edge["node"]["username"])
                 u.full_name = edge["node"]["full_name"]
                 u.is_verified = edge["node"]["is_verified"]
                 u.full_name = edge["node"]["full_name"]
@@ -103,11 +108,13 @@ class InstagramAPI(object):
 
                 user.add(u)
                 if self.brand == u.username:
-                    return {"status":True, "message":"Success"}
-            
-            has_next_page = edges["data"]["user"]["edge_follow"]["page_info"]["has_next_page"]
+                    return {"status": True, "message": "Success"}
+
+            has_next_page = edges["data"]["user"][
+                "edge_follow"]["page_info"]["has_next_page"]
             if has_next_page:
-                end_cursor = edges["data"]["user"]["edge_follow"]["page_info"]["end_cursor"]
+                end_cursor = edges["data"]["user"][
+                    "edge_follow"]["page_info"]["end_cursor"]
                 params = {
                     'query_hash': self.queryid,
                     'variables': '{"id":"%s","first":25,"after":"%s"}' % (user.id, end_cursor)
@@ -116,7 +123,7 @@ class InstagramAPI(object):
                 break
             time.sleep(2)
         return {"status": False, "message": "No following."}
-    
+
     def is_followed(self, user):
         params = {
             'query_hash': self.queryid,
@@ -138,9 +145,11 @@ class InstagramAPI(object):
                 if self.fan == u.username:
                     return {"status": True, "message": "Success"}
 
-            has_next_page = edges["data"]["user"]["edge_followed_by"]["page_info"]["has_next_page"]
+            has_next_page = edges["data"]["user"][
+                "edge_followed_by"]["page_info"]["has_next_page"]
             if has_next_page:
-                end_cursor = edges["data"]["user"]["edge_followed_by"]["page_info"]["end_cursor"]
+                end_cursor = edges["data"]["user"][
+                    "edge_followed_by"]["page_info"]["end_cursor"]
                 params = {
                     'query_hash': self.queryid,
                     'variables': '{"id":"%s","first":25,"after":"%s"}' % (user.id, end_cursor)
@@ -148,10 +157,9 @@ class InstagramAPI(object):
             else:
                 break
             time.sleep(3)
-        
+
         return {"status": False, "message": "No following."}
-    
-    
+
     def find_followed_query_id(self, r):
         js_url = re.search(
             "/static/bundles/base/Consumer.js/(.*?).js", r.text, re.S | re.M)
@@ -168,7 +176,7 @@ class InstagramAPI(object):
                 return None
         else:
             return None
-    
+
     def find_following_query_id(self, r):
         js_url = re.search(
             "/static/bundles/base/Consumer.js/(.*?).js", r.text, re.S | re.M)
@@ -190,13 +198,18 @@ class InstagramAPI(object):
         sharedData = self.parse_shared_data(r.text)
         if sharedData == {}:
             return None
-        
+
         t = html.fromstring(r.text)
-        userid = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["id"]
-        username = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["username"]
-        full_name = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["full_name"]
-        is_verified = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["is_verified"]
-        is_private = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["is_private"]
+        userid = sharedData["entry_data"][
+            "ProfilePage"][0]["graphql"]["user"]["id"]
+        username = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["username"]
+        full_name = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["full_name"]
+        is_verified = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["is_verified"]
+        is_private = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["is_private"]
         # following = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_follow"]["count"]
         # followed = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_followed_by"]["count"]
 
@@ -219,6 +232,7 @@ class InstagramAPI(object):
 
 
 class Content(object):
+
     def __init__(self, **kwargs):
         self.id = kwargs["id"]
         self.user = kwargs["user"]
@@ -235,6 +249,7 @@ class Content(object):
 
 
 class InContentAPI(object):
+
     def __init__(self, **kwargs):
         self.brand = kwargs["brand"]
         self.last_post_id = kwargs["last_post_id"]
@@ -259,7 +274,7 @@ class InContentAPI(object):
         brand_url = "%s/%s/" % (self.endpoint, self.brand)
         r = self.session.get(brand_url)
         if r.status_code != 200:
-            return {"status":None, "message": "Bad Response for Brand User."}
+            return {"status": None, "message": "Bad Response for Brand User."}
         self.queryid = self.find_post_query_id(r)
         # print (self.queryid)
         if self.queryid is None:
@@ -279,16 +294,18 @@ class InContentAPI(object):
             'variables': '{"id":"%s","first":25,"after":"%s"}' % (user.id, user.end_cursor)
         }
         while True:
-            r = self.session.get('https://www.instagram.com/graphql/query/', params=params)
+            r = self.session.get(
+                'https://www.instagram.com/graphql/query/', params=params)
             edges = r.json()
             # print (edges)
             if edges["status"] == "fail":
                 return {"status": False, "message": edges["message"]}
-            
+
             for node in edges["data"]["user"]["edge_owner_to_timeline_media"]["edges"]:
                 # print (node)
                 if len(node["node"]["edge_media_to_caption"]["edges"]) != 0:
-                    caption = node["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"] 
+                    caption = node["node"]["edge_media_to_caption"][
+                        "edges"][0]["node"]["text"]
                 else:
                     caption = ""
                 content = Content(
@@ -331,15 +348,17 @@ class InContentAPI(object):
                         }
                     }
                 )
-                print (len(user.contents), content)
+                print(len(user.contents), content)
                 # print (self.last_post_id)
                 user.contents.append(content)
                 if len(user.contents) >= 100 or content.id == self.last_post_id:
                     return self.get_json(user.contents[:100])
-            
-            has_next_page = edges["data"]["user"]["edge_owner_to_timeline_media"]["page_info"]["has_next_page"]
+
+            has_next_page = edges["data"]["user"][
+                "edge_owner_to_timeline_media"]["page_info"]["has_next_page"]
             if has_next_page:
-                end_cursor = edges["data"]["user"]["edge_owner_to_timeline_media"]["page_info"]["end_cursor"]
+                end_cursor = edges["data"]["user"][
+                    "edge_owner_to_timeline_media"]["page_info"]["end_cursor"]
                 params = {
                     'query_hash': self.queryid,
                     'variables': '{"id":"%s","first":25,"after":"%s"}' % (user.id, end_cursor)
@@ -348,7 +367,7 @@ class InContentAPI(object):
                 break
             time.sleep(2)
         return self.get_json(user.contents)
-    
+
     def get_json(self, cnts):
         ret_cnts = []
         for cnt in cnts:
@@ -364,13 +383,12 @@ class InContentAPI(object):
                 'images': cnt.images,
                 'images': cnt.images,
             })
-        
-        return ret_cnts
 
+        return ret_cnts
 
     def find_post_query_id(self, r):
         js_url = re.search(
-            "/static/bundles/base/ProfilePageContainer.js/(.*?)\.js\?es6=1", r.text, re.S | re.M)
+            "/static/bundles/base/ProfilePageContainer.js/(.*?)\.js", r.text, re.S | re.M)
 
         if js_url:
             js_link = "%s%s" % (self.endpoint, js_url.group(0))
@@ -384,20 +402,25 @@ class InContentAPI(object):
                 return None
         else:
             return None
-    
 
     def get_profile(self, r):
         sharedData = self.parse_shared_data(r.text)
         if sharedData == {}:
             return None
-        
+
         t = html.fromstring(r.text)
-        userid = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["id"]
-        username = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["username"]
-        full_name = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["full_name"]
-        is_verified = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["is_verified"]
-        is_private = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["is_private"]
-        profile_pic_url = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["profile_pic_url"]
+        userid = sharedData["entry_data"][
+            "ProfilePage"][0]["graphql"]["user"]["id"]
+        username = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["username"]
+        full_name = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["full_name"]
+        is_verified = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["is_verified"]
+        is_private = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["is_private"]
+        profile_pic_url = sharedData["entry_data"]["ProfilePage"][
+            0]["graphql"]["user"]["profile_pic_url"]
         # following = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]
         # followed = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_followed_by"]["count"]
 
@@ -408,11 +431,13 @@ class InContentAPI(object):
         user.profile_pic_url = profile_pic_url
 
         if sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["page_info"]["has_next_page"] == True:
-            user.end_cursor = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["page_info"]["end_cursor"]
-        
+            user.end_cursor = sharedData["entry_data"]["ProfilePage"][0]["graphql"][
+                "user"]["edge_owner_to_timeline_media"]["page_info"]["end_cursor"]
+
         for node in sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"]:
             if len(node["node"]["edge_media_to_caption"]["edges"]) != 0:
-                caption = node["node"]["edge_media_to_caption"]["edges"][0]["node"]["text"]
+                caption = node["node"]["edge_media_to_caption"][
+                    "edges"][0]["node"]["text"]
             else:
                 caption = ""
 
@@ -435,8 +460,9 @@ class InContentAPI(object):
                 comments={
                     "count": node["node"]["edge_media_to_comment"]["count"]
                 },
-                type=("video", "image")[node["node"]["is_video"]==False],
-                link="https://www.instagram.com/p/%s/" % (node["node"]["shortcode"]),
+                type=("video", "image")[node["node"]["is_video"] == False],
+                link="https://www.instagram.com/p/%s/" % (
+                    node["node"]["shortcode"]),
                 images={
                     "thumbnail": {
                         "width": node["node"]["thumbnail_resources"][0]["config_width"],
@@ -455,7 +481,7 @@ class InContentAPI(object):
                     }
                 }
             )
-            print (len(user.contents), content)
+            print(len(user.contents), content)
             if content.id == self.last_post_id:
                 self.is_last_post_id == True
                 break
@@ -471,11 +497,11 @@ class InContentAPI(object):
             return {}
 
 
-
 def contents(brand, last_post_id):
     api = InContentAPI(brand=brand, last_post_id=last_post_id)
     result = api.run()
     return result
+
 
 def main(fan, brand):
     # fan = sys.argv[1]
