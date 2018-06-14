@@ -243,7 +243,7 @@ class Content(object):
         self.comments = kwargs["comments"]
         self.link = kwargs["link"]
         self.type = kwargs["type"]
-
+        self.video_url = None
     def __repr__(self):
         return "Content %s" % (self.id)
 
@@ -348,6 +348,10 @@ class InContentAPI(object):
                         }
                     }
                 )
+                if node["node"]["is_video"] is True:
+                    video_url = node["node"]["video_url"]
+                    content.video_url = video_url
+
                 print(len(user.contents), content)
                 # print (self.last_post_id)
                 user.contents.append(content)
@@ -381,7 +385,7 @@ class InContentAPI(object):
                 'type': cnt.type,
                 'link': cnt.link,
                 'images': cnt.images,
-                'images': cnt.images,
+                'video_url': cnt.video_url
             })
 
         return ret_cnts
@@ -440,7 +444,6 @@ class InContentAPI(object):
                     "edges"][0]["node"]["text"]
             else:
                 caption = ""
-
             content = Content(
                 id="%s_%s" % (node["node"]["id"], userid),
                 user={
@@ -481,6 +484,9 @@ class InContentAPI(object):
                     }
                 }
             )
+            if node["node"]["is_video"] is True:
+                video_url = node["node"]["video_url"]
+                content.video_url = video_url
             print(len(user.contents), content)
             if content.id == self.last_post_id:
                 self.is_last_post_id == True
