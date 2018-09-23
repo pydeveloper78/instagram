@@ -243,7 +243,7 @@ class Content(object):
         self.video_url = None
     
     def __repr__(self):
-        return "Content %s %s %s" % (self.id)
+        return "Content %s" % (self.id)
 
 
 class InContentAPI(object):
