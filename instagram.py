@@ -51,7 +51,7 @@ class InstagramAPI(object):
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'en-US,en;q=0.9',
-            'cookie': 'csrftoken=dCCrgXTqkaSIlhK0ZxSqyBCc0IotNr8w; ds_user_id=7109575542; rur=FTW; mid=Wwrb1wAEAAEHnDTDqZqdZPvXf1HL; mcd=3; sessionid=IGSC91ee39d8409b3d9cfb4b1fd420067d9a25c29de8b73f2239f9752d0d64202d2c%3ApOCcw16OUIkCbAmxNNwXCGZYU2txIho1%3A%7B%22_auth_user_id%22%3A7109575542%2C%22_auth_user_backend%22%3A%22accounts.backends.CaseInsensitiveModelBackend%22%2C%22_auth_user_hash%22%3A%22%22%2C%22_platform%22%3A4%2C%22_token_ver%22%3A2%2C%22_token%22%3A%227109575542%3ApiS6NSoutAxNBvpi9ndUcGituvmgfN5f%3Aa0d6f0342f654f3fc8e45133b4bee03360b6adb528cd2fe09368fa929886793e%22%2C%22last_refreshed%22%3A1527757532.9577643871%7D; urlgen="{\\"time\\": 1527757533\\054 \\"23.27.206.3\\": 18779\\054 \\"209.58.130.129\\": 7203}:1fOdOJ:8g8iYMESSWplj6YMRchKzCJvIG8"',
+            'cookie': 'sessionid=IGSC72e744b84b15e3d827892e5e57a5cf63734d1a097800c81d98842ee6b6464a12%3A0H9LhlbAWEZtD0RrmM2cbV8XAUHve2nn%3A%7B%22_auth_user_id%22%3A7109575542%2C%22_auth_user_backend%22%3A%22accounts.backends.CaseInsensitiveModelBackend%22%2C%22_auth_user_hash%22%3A%22%22%2C%22_platform%22%3A4%2C%22_token_ver%22%3A2%2C%22_token%22%3A%227109575542%3Aef6Ytycxq4CfqCYFILGAN9rA8R4Sk1dA%3A622e2c3b39690056440d62e136422d40f0a70481c9ea652c2d6c181314df44b2%22%2C%22last_refreshed%22%3A1537714456.3288357258%7D',
         }
         self.session.headers.update(headers)
 
@@ -180,12 +180,11 @@ class InstagramAPI(object):
     def find_following_query_id(self, r):
         js_url = re.search(
             "/static/bundles/base/Consumer.js/(.*?).js", r.text, re.S | re.M)
-
         if js_url:
             js_link = "%s%s" % (self.endpoint, js_url.group(0))
             res = self.session.get(js_link)
             query_filter = re.search(
-                "\,s\=\"(.*?)\"\,l\=1\;", res.text, re.S | re.M)
+                ",l=\"(.*?)\"\,s=1;", res.text, re.S | re.M)
             if query_filter:
                 qid = query_filter.group(1)
                 return qid
@@ -210,8 +209,6 @@ class InstagramAPI(object):
             0]["graphql"]["user"]["is_verified"]
         is_private = sharedData["entry_data"]["ProfilePage"][
             0]["graphql"]["user"]["is_private"]
-        # following = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_follow"]["count"]
-        # followed = sharedData["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_followed_by"]["count"]
 
         user = User(id=userid, username=username)
         user.full_name = full_name
@@ -244,8 +241,9 @@ class Content(object):
         self.link = kwargs["link"]
         self.type = kwargs["type"]
         self.video_url = None
+    
     def __repr__(self):
-        return "Content %s" % (self.id)
+        return "Content %s %s %s" % (self.id)
 
 
 class InContentAPI(object):
@@ -266,7 +264,7 @@ class InContentAPI(object):
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'en-US,en;q=0.9',
-            'cookie': 'csrftoken=dCCrgXTqkaSIlhK0ZxSqyBCc0IotNr8w; ds_user_id=7109575542; rur=FTW; mid=Wwrb1wAEAAEHnDTDqZqdZPvXf1HL; mcd=3; sessionid=IGSC91ee39d8409b3d9cfb4b1fd420067d9a25c29de8b73f2239f9752d0d64202d2c%3ApOCcw16OUIkCbAmxNNwXCGZYU2txIho1%3A%7B%22_auth_user_id%22%3A7109575542%2C%22_auth_user_backend%22%3A%22accounts.backends.CaseInsensitiveModelBackend%22%2C%22_auth_user_hash%22%3A%22%22%2C%22_platform%22%3A4%2C%22_token_ver%22%3A2%2C%22_token%22%3A%227109575542%3ApiS6NSoutAxNBvpi9ndUcGituvmgfN5f%3Aa0d6f0342f654f3fc8e45133b4bee03360b6adb528cd2fe09368fa929886793e%22%2C%22last_refreshed%22%3A1527757532.9577643871%7D; urlgen="{\\"time\\": 1527757533\\054 \\"23.27.206.3\\": 18779\\054 \\"209.58.130.129\\": 7203}:1fOdOJ:8g8iYMESSWplj6YMRchKzCJvIG8"',
+            'cookie': 'sessionid=IGSC72e744b84b15e3d827892e5e57a5cf63734d1a097800c81d98842ee6b6464a12%3A0H9LhlbAWEZtD0RrmM2cbV8XAUHve2nn%3A%7B%22_auth_user_id%22%3A7109575542%2C%22_auth_user_backend%22%3A%22accounts.backends.CaseInsensitiveModelBackend%22%2C%22_auth_user_hash%22%3A%22%22%2C%22_platform%22%3A4%2C%22_token_ver%22%3A2%2C%22_token%22%3A%227109575542%3Aef6Ytycxq4CfqCYFILGAN9rA8R4Sk1dA%3A622e2c3b39690056440d62e136422d40f0a70481c9ea652c2d6c181314df44b2%22%2C%22last_refreshed%22%3A1537714456.3288357258%7D'
         }
         self.session.headers.update(headers)
 
@@ -276,7 +274,6 @@ class InContentAPI(object):
         if r.status_code != 200:
             return {"status": None, "message": "Bad Response for Brand User."}
         self.queryid = self.find_post_query_id(r)
-        # print (self.queryid)
         if self.queryid is None:
             return {"status": None, "message": "Invalid Brand Query Hash."}
         brand_user = self.get_profile(r)
@@ -297,12 +294,10 @@ class InContentAPI(object):
             r = self.session.get(
                 'https://www.instagram.com/graphql/query/', params=params)
             edges = r.json()
-            # print (edges)
             if edges["status"] == "fail":
                 return {"status": False, "message": edges["message"]}
 
             for node in edges["data"]["user"]["edge_owner_to_timeline_media"]["edges"]:
-                # print (node)
                 if len(node["node"]["edge_media_to_caption"]["edges"]) != 0:
                     caption = node["node"]["edge_media_to_caption"][
                         "edges"][0]["node"]["text"]
@@ -349,11 +344,13 @@ class InContentAPI(object):
                     }
                 )
                 if node["node"]["is_video"] is True:
-                    video_url = node["node"]["video_url"]
+                    if "video_url" in node["node"]:
+                        video_url = node["node"]["video_url"]
+                    else:
+                        video_url = None
                     content.video_url = video_url
 
                 print(len(user.contents), content)
-                # print (self.last_post_id)
                 user.contents.append(content)
                 if len(user.contents) >= 100 or content.id == self.last_post_id:
                     return self.get_json(user.contents[:100])
@@ -393,12 +390,12 @@ class InContentAPI(object):
     def find_post_query_id(self, r):
         js_url = re.search(
             "/static/bundles/base/ProfilePageContainer.js/(.*?)\.js", r.text, re.S | re.M)
-
         if js_url:
             js_link = "%s%s" % (self.endpoint, js_url.group(0))
             res = self.session.get(js_link)
             query_filter = re.search(
-                "o\.pagination\}\,queryId\:\"(.*?)\"\,", res.text, re.S | re.M)
+                "r\.pagination\}\,queryId\:\"(.*?)\"\,", res.text, re.S | re.M)
+
             if query_filter:
                 qid1 = query_filter.group(1)
                 return qid1
@@ -485,9 +482,13 @@ class InContentAPI(object):
                 }
             )
             if node["node"]["is_video"] is True:
-                video_url = node["node"]["video_url"]
+                if "video_url" in node["node"]:
+                    video_url = node["node"]["video_url"]
+                else:
+                    video_url = None
                 content.video_url = video_url
-            print(len(user.contents), content)
+            
+            
             if content.id == self.last_post_id:
                 self.is_last_post_id == True
                 break
@@ -510,13 +511,6 @@ def contents(brand, last_post_id):
 
 
 def main(fan, brand):
-    # fan = sys.argv[1]
-    # brand = sys.argv[2]
     api = InstagramAPI(fan=fan, brand=brand)
     result = api.run()
     return result
-    # print (result)
-
-
-# if __name__ == '__main__':
-#     main()

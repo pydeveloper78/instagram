@@ -14,9 +14,9 @@ class InstAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'f', type=str, required=True, help='Fan Username', location='json')
+            'f', type=str, required=True, help='Fan Username', location='form')
         self.reqparse.add_argument(
-            'b', type=str, help="Brand Username", required=True, location='json')
+            'b', type=str, help="Brand Username", required=True, location='form')
         super(InstAPI, self).__init__()
 
     def get(self):
@@ -25,7 +25,6 @@ class InstAPI(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
-        print(args)
         return main(args.f, args.b), 200
 
 
@@ -34,9 +33,9 @@ class InstContentsAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
-            'brand', type=str, required=True, help='Brand Username', location='json')
+            'brand', type=str, required=True, help='Brand Username', location='form')
         self.reqparse.add_argument(
-            'last_post_id', type=str, help="Last Post ID", location='json')
+            'last_post_id', type=str, help="Last Post ID", location='form')
         super(InstContentsAPI, self).__init__()
 
     def get(self):
@@ -49,11 +48,11 @@ class InstContentsAPI(Resource):
 
     def post(self):
         args = self.reqparse.parse_args()
+        print (args)
         try:
             last_post_id = args.last_post_id
         except:
             last_post_id = None
-        print (args)
         return contents(args.brand, last_post_id), 200
 
 api.add_resource(InstAPI, '/api/v1/follow', endpoint='follow')
